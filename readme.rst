@@ -54,7 +54,7 @@ The unit is manufactured in the USA.
     *   `Project Website <https://iotawatt.com>`_
     *   `User Forum <https://community.iotawatt.com>`_
 
-.. image:: Docs/pics/Darkmode_Offline_Graph.png
+.. image:: Docs/pics/Darkmode_Status.png
     :scale: 20 %
     :align: left
 
