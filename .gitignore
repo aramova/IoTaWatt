@@ -7,3 +7,4 @@ Firmware\.pio
 *.dblite
 *.dblite
 Firmware/.pio/build/.sconsign.dblite
+.DS_Store

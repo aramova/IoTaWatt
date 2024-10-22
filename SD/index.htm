@@ -10,7 +10,7 @@
 
 </head>
 
-<body onload="setup()">
+<body onload="setup()" style="background-color: #000000d6;">
 
     <div id="outerContainer" class="color_outer">
         <h3 id="heading">IoTaWatt Power Monitor</h3>
@@ -77,7 +77,8 @@
                   title="Enhanced graph utility">Graph+</button>
               <button class="mainMenuButton" onclick="mainMenuButton(this,loadGraph)"
                   title="Original graph utility">Original Graph</button>
-              
+              <button class="mainMenuButton" onclick="mainMenuButton(this,loadGraphOffline)"
+                  title="Offline graph utility">Offline Graph</button>
             </span>
                         </span>
                     </td>
@@ -568,6 +569,7 @@
         var editURL = "edit.htm";
         var graphURL = "graph.htm";
         var graph2URL = "graph2.htm";
+        var graphofflineURL = "graphoffline.htm";
         var msgsFileURL = "/iotawatt/iotamsgs.txt?textpos=-10000";
         var currentBody = [];
         var configSHA256;
@@ -3213,6 +3215,10 @@
 
         function loadGraph2() {
             var myWindow = window.open(graph2URL, "_self");
+            resetDisplay();
+        }
+        function loadGraphOffline() {
+            var myWindow = window.open(graphofflineURL, "_self");
             resetDisplay();
         }
 

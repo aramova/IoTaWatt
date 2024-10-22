@@ -1,337 +1,266 @@
-  /****** Color Scheme ******************/
- 
- .color_outer {background-color: #c2eaba; border-color: black;}
- .color_menu {background-color: #a7c4a0;}
- .color_body {background-color: #e6efe9; border-color: grey;}
- .color_inputcontainer {background-color: #b6dbab; border-color: grey;}
- 
- /***** Global style attributes *******/
+/****** Color Scheme ******************/
 
- * {
-   box-sizing: border-box;
-   font-family: "arial", "sans-serif";
-   border-radius: 4px;
- }
- 
- h1, h2, h3, h4 {text-align: center;}
- 
- input, select {
-    background-color: whiteSmoke;
+.color_outer { 
+    background-color: #1e1e1e; /* Dark background similar to the image */
+    border-color: #393939; /* Slightly lighter border color */
+}
+.color_menu {
+    background-color: #1e1e1e; 
+}
+.color_body { 
+    background-color: #1e1e1e; 
+    border-color: #393939; 
+}
+.color_inputcontainer { 
+    background-color: #1e1e1e; 
+    border-color: #393939; 
+}
+
+/***** Global style attributes *******/
+
+* {
+  box-sizing: border-box;
+  font-family: "arial", "sans-serif";
+  border-radius: 4px;
+  color: #DCDCDC; /* Set default text color to a lighter grey */
+}
+
+h1, h2, h3, h4 { 
+    text-align: center; 
+    color: #eee; /* Slightly brighter heading color */
+}
+
+input, select {
+    background-color: #2b2b2b; /* Slightly different input background */
     height: 35px;
     min-width: 50px;
     padding: 2px 3px 2px 3px;
-    border: 2px solid;
+    border: 2px solid #393939; 
     border-radius: 4px;
     font-size: 100%;
+    color: #DCDCDC; 
   }
-  
- input[type=checkbox]{
-    height: 18px;
-  }  
-  
- table {width: 100%}
-  
-  /***************** buttons  *************/  
-  
- button { 
+
+input[type=checkbox]{
+  height: 18px;
+}
+
+table {width: 100%}
+
+/***************** buttons  *************/  
+
+button {
     height: 24px;
     min-width: 40px;
-    border: 2px solid;
-    background-color: #a9b4ce; 
+    border: 2px solid #393939; 
+    background-color: #393939; /* Darker button background */
     border-radius: 4px;
     text-align: center;
-  }
- 
-  .buttonDown{background-color: #e6efe9;}
-  .buttonUp{background-color: #a9b4ce;}
- 
-  .actionDelete,
-  .actionCancel,
-  .actionSave,
-  .actionCal {
-    border: 2px solid grey;
-    height: 35px;
-    border-radius: 4px;
-    font-size: 120%;
-  }
-   
-  .actionDelete {background-color: red;}
-  .actionCancel {background-color: yellow;}
-  .actionSave {background-color: Green;}
-  .actionCal {background-color: linen;}
- 
-  .mainMenuButton{
-    width: 100%;
-    height: 35px;
-    font-size: 100%;
-  }
-  
-  .mainMenuButton:hover{
-    background-color: #e6efe9;
-  }
-  
-  .configButton {
-    width: 100%;
-    height: 20px;
-    font-size: 80%;
-    padding-bottom: 1px;
-  }
-  
-  .groupTab{
-    border-radius: 4px;
-    width: 100%;
-    height: 20px;
-    font-size: 80%;
-  }
-  
-  /************** Main Menu  Dropdown *************************/
-  
-  .dropdown{
-    width: 100%;
-    position: relative;
-    display: inline-block;
-  }
-  
-  .dropbtn{
-    cursor: pointer;
-  }
-  
-  .dropContent{
-    display: none;
-    position: absolute;
-    z-index: 1;
-  }
-  
-  .dropContent button{
-    height: 35px;
-    display: block;
-  }
-  
-  .dropContent button:hover{
-    background-color: #e6efe9;
-  }
-  
-  .dropdown:hover .dropContent{
-    display: block;
-  }
-  
-  .dropdown:hover .dropbtn{
-    background-color: #e6efe9;
-  }
-  
-  /********************************************************/
-  
-  #mainMenuTable{
-    width: 100%;
-    border-radius: inherit;
+    color: #DCDCDC; 
   }
 
-  .statusDiv{
-    width: 95%;
-    margin: 1px auto 1px auto;
-    padding: 4px;
-  }
-  
-  .inputContainer{
-    width: 100%;
-    border-radius: inherit;
-  }
-  
-  #inputTable {
-    width: 100%;
-    padding: 5px 20px 10px 20px;
-    text-align: left;
-  }
-  #inputTable tr td {
-    height: 25px;
-  }
-  
-  #inputEdit #inputCalVT {
-    width:340px;
-    border: 2px solid;
-    margin: auto;
-  }
-  
-  .outputsRow{
-    vertical-align: top;
-  }
-  #inputCalCal {
-    width: 60px;
-  }
-  
-  #calConfirm{
-    width: 100px;
-    height: 40px;
-    text-align: center;
-    background-color: red;
-  }
+.buttonDown{background-color: #2b2b2b;} 
+.buttonUp{background-color: #393939;} 
 
-  .noDisplay {
-    display: none;
-  }
-  
-  .display {
-    display: block;
-  }
-  
-  /*   New Layout */
-  
-  #header {
-    margin: 0; border: 0; padding: 0;
-  }
-  
-  #outerContainer {
-      border: 2px solid;
-      max-width: 600px;
-      padding: 4px 4px 4px 4px;
-      border-radius: 6px;
-    }
-    
-  #mainMenu {
-    width: 100%;
-    border: 2px solid;
-    padding: 4px;
-    margin: 0px;
-  }
-  
-  #mainBody{
-    width: 100%;
-    border: 2px solid;
-    padding: 1px 4px;
-    margin: 0px;
-  }
-  
-  #copyright{
-    width: 100%;
-    height: 12px;
-    margin: 0px;
-    padding: 0px;
-  }
-  
-  #panicMessageDiv{
-    width: 100%;
-    border: 2px solid;
-    padding: 1px 4px 1px 4px;
-    margin: auto;
-  }
-  
-  #configMenu{
-    width: 100%;
-  }
-  /*  
-  .menu {
-    width: 100%;
-    border: 2px solid grey;
-    padding: 4px;
-  }
-  */
-  .body {
-    width: 100%;
-    padding: 4px;
-    margin: auto;
-  }
-  
-  .tools{
-    
-  }
-   
-/************************ Calculator ******************************/
+.actionDelete,
+.actionCancel,
+.actionSave,
+.actionCal {
+  border: 2px solid #555; /* Slightly darker border */
+  height: 35px;
+  border-radius: 4px;
+  font-size: 120%;
+  color: #DCDCDC; 
+}
 
-  #divCalc{
-    border: 0px;
-    margin: auto;
-  }
- 
-  #calcBody{
-    width: 400px;
-    margin: auto;
-    padding: 20px;
-    border-style: ridge;
-    border-radius: inherit;
-  }
-    
-  .calcField{text-align: right; }  
-  #calcName {width: 120px; height: 30px; margin-top: 4px; margin-bottom: 4px;}
-  #calcUnits {width: 100px; height: 30px; margin-bottom: 2px;}
- 
-  #calcDisplay{
-    font-family: console, lucida, Sans-serif;
-    background-color: whiteSmoke;
-    border: 2px;
-    border-style: ridge;
-  	padding: 5px 5px 5px 5px;
-  	font-size: 100%;
-  	text-align: left;
-  }
-  
-  #calcKeypad {
-    width: 100%; 
-    border: 2px;
-    border-style: ridge; 
-    border-radius: inherit;
-  }
-  
-  #calcActions {
-    margin-top: 5px;
-  }
-  
-  .calcButton {
-  	border: 1px;
-  	border-style: ridge;
-  	width: 80px;
-  	height: 44px;
-  	border-radius: 8px;
-  	color: white;
-  	font-size: 150%;
-  	font-weight: bold;
-  	text-align:center;
-  }
-  
-  .calcNumeric {
-    background-color: lightSlateGrey;
-  }
-  .calcClr {
-    background-color: yellow;
-    color: black;
-  }
-  .calcBack {
-    background-color: grey;
-  }
-  .calcOp {
-    background-color: darkSlateGrey;
-  }
-  .calcParen {
-    background-color: dimgrey;
-  }
-  .calcInput {
-    background-color: darkOliveGreen;
-    cursor: pointer;
-  }
-  .calcInputDropdown:hover .calcInputDropdown-content{
-    display: table;
-  } 
-  .calcInputDropdown{
-    position: relative;
-    display: inline-block;
-  }
-  .calcInputDropdown-content{
-    display: none;
-    position: absolute;
-    left: 80px;
-    top:  0px;
-    z-index: 1;
-  }
-  .calcInputDropdown-content p{
-    background-color: whiteSmoke;
-    border: 1px solid grey;
-    min-width: 80px;
-    height: 20px;
-    margin: 0px;
-    text-align: center;
-  }
-  .calcAbs {
-    background-color: lightSteelBlue;
-  }
-  
-  /******************************  end calc css *****************************/
-  
+.actionDelete {background-color: #d14949;} /* Slightly different red */
+.actionCancel {background-color: #d1c449;} /* Slightly different yellow */
+.actionSave {background-color: #49d149;} /* Slightly different green */
+.actionCal {background-color: #404040;} /* Darker linen color */
+
+.mainMenuButton{
+  width: 100%;
+  height: 35px;
+  font-size: 100%;
+  color: #DCDCDC; 
+}
+
+.mainMenuButton:hover{
+  background-color: #444; /* Subtle hover effect */
+}
+
+.configButton {
+  width: 100%;
+  height: 20px;
+  font-size: 80%;
+  padding-bottom: 1px;
+  color: #DCDCDC; 
+}
+
+.groupTab{
+  border-radius: 4px;
+  width: 100%;
+  height: 20px;
+  font-size: 80%;
+  color: #DCDCDC; 
+}
+
+/************** Main Menu  Dropdown *************************/
+
+.dropdown{
+  width: 100%;
+  position: relative;
+  display: inline-block;
+}
+
+.dropbtn{
+  cursor: pointer;
+  color: #DCDCDC; 
+}
+
+.dropContent{
+  display: none;
+  position: absolute;
+  z-index: 1;
+  background-color: #1e1e1e; 
+}
+
+.dropContent button{
+  height: 35px;
+  display: block;
+  color: #DCDCDC; 
+}
+
+.dropContent button:hover{
+  background-color: #444; 
+}
+
+.dropdown:hover .dropContent{
+  display: block;
+}
+
+.dropdown:hover .dropbtn{
+  background-color: #444; 
+}
+
+/********************************************************/
+
+#mainMenuTable{
+  width: 100%;
+  border-radius: inherit;
+}
+
+.statusDiv{
+  width: 95%;
+  margin: 1px auto 1px auto;
+  padding: 4px;
+  color: #DCDCDC; 
+}
+
+.inputContainer{
+  width: 100%;
+  border-radius: inherit;
+  background-color: #1e1e1e; 
+}
+
+#inputTable {
+  width: 100%;
+  padding: 5px 20px 10px 20px;
+  text-align: left;
+  color: #DCDCDC; 
+}
+#inputTable tr td {
+  height: 25px;
+}
+
+#inputEdit #inputCalVT {
+  width:340px;
+  border: 2px solid #393939; 
+  margin: auto;
+  color: #DCDCDC; 
+  background-color: #2b2b2b;
+}
+
+.outputsRow{
+  vertical-align: top;
+}
+#inputCalCal {
+  width: 60px;
+}
+
+#calConfirm{
+  width: 100px;
+  height: 40px;
+  text-align: center;
+  background-color: #d14949; 
+  color: #DCDCDC; 
+}
+
+.noDisplay {
+  display: none;
+}
+
+.display {
+  display: block;
+}
+
+/*   New Layout */
+
+#header {
+  margin: 0; border: 0; padding: 0;
+}
+
+#outerContainer {
+  border: 2px solid #393939; 
+  max-width: 600px;
+  padding: 4px 4px 4px 4px;
+  border-radius: 6px;
+  background-color: #1e1e1e; 
+}
+
+#mainMenu {
+  width: 100%;
+  border: 2px solid #393939; 
+  padding: 4px;
+  margin: 0px;
+  background-color: #1e1e1e; 
+}
+
+#mainBody{
+  width: 100%;
+  border: 2px solid #393939; 
+  padding: 1px 4px;
+  margin: 0px;
+  background-color: #1e1e1e; 
+}
+
+#copyright{
+  width: 100%;
+  height: 12px;
+  margin: 0px;
+  padding: 0px;
+  color: #DCDCDC; 
+}
+
+#panicMessageDiv{
+  width: 100%;
+  border: 2px solid #393939; 
+  padding: 1px 4px 1px 4px;
+  margin: auto;
+  background-color: #1e1e1e; 
+  color: #DCDCDC; 
+}
+
+#configMenu{
+  width: 100%;
+  background-color: #1e1e1e; 
+}
+
+.body {
+  width: 100%;
+  padding: 4px;
+  margin: auto;
+  background-color: #1e1e1e; 
+}
+
+/************************
