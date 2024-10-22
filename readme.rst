@@ -52,21 +52,15 @@ The unit is manufactured in the USA.
     *   `Project Website <https://iotawatt.com>`_
     *   `User Forum <https://community.iotawatt.com>`_
 
-.. image:: Docs/pics/inputsOutputsDisplay.png
+.. image:: Docs/pics/Darkmode_Offline_Graph.png
     :scale: 20 %
     :align: left
 
-.. image:: Docs/pics/graphMultichannel.jpg
+.. image:: Docs/pics/Darkmode_Offline_Graph.png
     :scale: 20 %
     :align: right
 
-.. image:: Docs/pics/totalPowerOutput.png
-    :scale: 20 %
-    :align: center
-
-.. image:: Docs/pics/PVoutputDisplay.png
-    :scale: 20 %
-    :align: center
+If you export to Grafana you can get some snazy dashboards as shown below
 
 .. image:: Docs/pics/influxDBGrafana.png
     :scale: 20 %
