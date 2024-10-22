@@ -1,6 +1,8 @@
 =========================================
-IoTaWatt WiFi Electricity Monitor Project
+IoTaWatt WiFi Electricity Monitor Project - Dark mode Fork
 =========================================
+
+This is a full and direct fork of https://github.com/boblemaire/IoTaWatt.git meant to enable Dark Mode as well as Offline Graphs
 
 IoTaWatt is an open-source, open hardware project to produce an accurate, 
 inexpensive and easy to use energy monitor.  
