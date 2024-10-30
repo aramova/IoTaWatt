@@ -263,4 +263,107 @@ button {
   background-color: #1e1e1e; 
 }
 
-/************************
+.tools{
+    
+  }
+   
+/************************ Calculator ******************************/
+
+  #divCalc{
+    border: 0px;
+    margin: auto;
+  }
+ 
+  #calcBody{
+    width: 400px;
+    margin: auto;
+    padding: 20px;
+    border-style: ridge;
+    border-radius: inherit;
+  }
+    
+  .calcField{text-align: right; }  
+  #calcName {width: 120px; height: 30px; margin-top: 4px; margin-bottom: 4px;}
+  #calcUnits {width: 100px; height: 30px; margin-bottom: 2px;}
+ 
+  #calcDisplay{
+    font-family: console, lucida, Sans-serif;
+    background-color: whiteSmoke;
+    border: 2px;
+    border-style: ridge;
+    padding: 5px 5px 5px 5px;
+    font-size: 100%;
+    text-align: left;
+  }
+  
+  #calcKeypad {
+    width: 100%; 
+    border: 2px;
+    border-style: ridge; 
+    border-radius: inherit;
+  }
+  
+  #calcActions {
+    margin-top: 5px;
+  }
+  
+  .calcButton {
+    border: 1px;
+    border-style: ridge;
+    width: 80px;
+    height: 44px;
+    border-radius: 8px;
+    color: white;
+    font-size: 150%;
+    font-weight: bold;
+    text-align:center;
+  }
+  
+  .calcNumeric {
+    background-color: lightSlateGrey;
+  }
+  .calcClr {
+    background-color: yellow;
+    color: black;
+  }
+  .calcBack {
+    background-color: grey;
+  }
+  .calcOp {
+    background-color: darkSlateGrey;
+  }
+  .calcParen {
+    background-color: dimgrey;
+  }
+  .calcInput {
+    background-color: darkOliveGreen;
+    cursor: pointer;
+  }
+  .calcInputDropdown:hover .calcInputDropdown-content{
+    display: table;
+  } 
+  .calcInputDropdown{
+    position: relative;
+    display: inline-block;
+  }
+  .calcInputDropdown-content{
+    display: none;
+    position: absolute;
+    left: 80px;
+    top:  0px;
+    z-index: 1;
+  }
+  .calcInputDropdown-content p{
+    background-color: whiteSmoke;
+    border: 1px solid grey;
+    min-width: 80px;
+    height: 20px;
+    margin: 0px;
+    text-align: center;
+  }
+  .calcAbs {
+    background-color: lightSteelBlue;
+  }
+  
+  /******************************  end calc css *****************************/
+  
