@@ -3345,7 +3345,28 @@
             getConfig();
             resetDisplay();
         }
-    </script>
+            function toggleDarkMode() {
+                const body = document.body;
+                body.classList.toggle("dark-mode");
+                const isDarkMode = body.classList.contains("dark-mode");
+                localStorage.setItem("isDarkMode", isDarkMode);
+            }
+
+            function updateDarkMode() {
+                const isDarkMode = localStorage.getItem("isDarkMode");
+                if (isDarkMode == "true") {
+                    document.body.classList.add("dark-mode");
+                } else {
+                    document.body.classList.remove("dark-mode");
+                }
+            }
+            function setupDarkMode(){
+                const darkModeToggle = document.getElementById("darkModeToggle");
+                darkModeToggle.addEventListener("click", toggleDarkMode);
+                updateDarkMode();
+            }
+            setupDarkMode()
+        </script>
 </body>
 
 </html>

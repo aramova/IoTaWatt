@@ -122,7 +122,7 @@ $("#placeholder").bind("plothover", function (event, pos, item) {
           "<br><span style='font-size:11px'>" +
           date +
           "</span>",
-        "#fff"
+        document.body.classList.contains('dark-mode') ? "#000" : "#fff"
       );
     }
   } else $("#tooltip").remove();

@@ -1,18 +1,19 @@
 /****** Color Scheme ******************/
 
 .color_outer { 
-    background-color: #1e1e1e; /* Dark background similar to the image */
+    background-color: #FFFFFF;
     border-color: #393939; /* Slightly lighter border color */
 }
-.color_menu {
-    background-color: #1e1e1e; 
+
+body:not(.dark-mode) .color_menu {
+    background-color: #FFFFFF; 
 }
-.color_body { 
-    background-color: #1e1e1e; 
+body:not(.dark-mode) .color_body { 
+    background-color: #FFFFFF; 
     border-color: #393939; 
 }
-.color_inputcontainer { 
-    background-color: #1e1e1e; 
+body:not(.dark-mode) .color_inputcontainer { 
+    background-color: #FFFFFF; 
     border-color: #393939; 
 }
 
@@ -22,7 +23,15 @@
   box-sizing: border-box;
   font-family: "arial", "sans-serif";
   border-radius: 4px;
-  color: #DCDCDC; /* Set default text color to a lighter grey */
+}
+
+body.dark-mode *{
+  color: #DCDCDC;
+  background-color: #1e1e1e;
+}
+body:not(.dark-mode) *{
+    color: #000000;
+    background-color: #ffffff;
 }
 
 h1, h2, h3, h4 { 

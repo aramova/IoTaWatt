@@ -54,6 +54,40 @@
                 overflow-y: auto;
                 z-index: 1000;
               }
+              body:not(.dark-mode) #sidebar-wrapper {
+                background: #eee;
+              }
+
+              body.dark-mode #sidebar-wrapper {
+                background: #1e1e1e;
+              }
+
+              #page-content-wrapper {
+                width: 100%;
+                padding-left: 0px;
+              }
+              body:not(.dark-mode) #page-content-wrapper {
+                background: #FFFFFF;
+              }
+              body.dark-mode #page-content-wrapper {
+                  background: #1e1e1e;
+              }
+              #sidebar-close{
+                  color: #eee;
+              }
+              body:not(.dark-mode) #sidebar-close {
+                color: #000000;
+              }
+              body.dark-mode #sidebar-close {
+                color: #DCDCDC;
+              }
+              #feeds td {
+                  color: #000000;
+              }
+              body.dark-mode #feeds td{
+                  color: #DCDCDC;
+              }
+            </style>
 
               #page-content-wrapper {
                 width: 100%;
