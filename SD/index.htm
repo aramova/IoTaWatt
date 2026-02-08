@@ -234,6 +234,7 @@
                 <p>
                     <button class="actionDelete" id="serverDelete">delete</button>
                     <button class="actionCancel" id="serverCancel" onclick="serverCancel()">cancel</button>
+                    <span id="serverSaveMsg" style="color: red; display: none;"></span>
                     <button class="actionSave" id="serverSave" onclick="serverSave()">save</button>
                 </p>
             </div>
@@ -2322,16 +2323,35 @@
             checkEmoncms();
         }
 
+        function updateServerSaveButton(reasons) {
+            var saveBtn = EbyId("serverSave");
+            var msgSpan = EbyId("serverSaveMsg");
+            if (reasons.length == 0) {
+                saveBtn.style.display = "inline";
+                if (msgSpan) {
+                    msgSpan.innerHTML = "";
+                    msgSpan.style.display = "none";
+                }
+            } else {
+                saveBtn.style.display = "none";
+                if (msgSpan) {
+                    msgSpan.innerHTML = "Save disabled (" + reasons.join(", ") + ")";
+                    msgSpan.style.display = "inline";
+                }
+            }
+        }
+
         function checkEmoncms() {
-            var complete = validateInput("serverNode") &&
-                validateInput("serverPost") &&
-                validateInput("serverBulk") &&
-                validateInput("serverURL") &&
-                validateInput("serverKey") &&
-                validateInput("serverUser") &&
-                validateInput("serverBegd") &&
-                (config[emoncmsAlias].apikey != "");
-            EbyId("serverSave").style.display = complete ? "inline" : "none";
+            var reasons = [];
+            if (!validateInput("serverNode")) reasons.push("Node");
+            if (!validateInput("serverPost")) reasons.push("Post Interval");
+            if (!validateInput("serverBulk")) reasons.push("Bulk Send");
+            if (!validateInput("serverURL")) reasons.push("URL");
+            if (!validateInput("serverKey")) reasons.push("API Key");
+            if (!validateInput("serverUser")) reasons.push("User ID");
+            if (!validateInput("serverBegd")) reasons.push("Begin Date");
+            if (config[emoncmsAlias].apikey == "") reasons.push("API Key (empty)");
+            updateServerSaveButton(reasons);
         }
 
         function deleteEmoncms() {
@@ -2503,6 +2523,7 @@
             fkeyInput.value = serverConfig.fieldkey;
             fkeyInput.placeholder = "default is 'value'";
 
+            if (serverConfig.tagset === undefined) serverConfig.tagset = [];
             EbyId("divInfluxTagSet").style.display = "inline";
             buildTagSet();
 
@@ -2567,30 +2588,30 @@
         var pattern_fkey = new RegExp('^[A-Z\\d_$-]*$', 'i');
 
         function checkInfluxdb() {
-            var complete = true;
-            complete &= validateRegex("serverURL", pattern_URL, "Please enter a valid URL.");
-            if (!validateInput("serverPost")) complete = false;
-            if (!validateInput("serverBulk")) complete = false;
+            var reasons = [];
+            if (!validateRegex("serverURL", pattern_URL, "Please enter a valid URL.")) reasons.push("URL");
+            if (!validateInput("serverPost")) reasons.push("Post Interval");
+            if (!validateInput("serverBulk")) reasons.push("Bulk Send");
             if (serverConfig.version == 1) {
-                complete &= validateRegex("serverDb", pattern_db, "Alphanumeric database name required");
-                complete &= validateRegex("serverRetp", pattern_retp, "Must be Alphanumeric");
-                complete &= validateRegex("serverUser", pattern_user, "Must be Alphanumeric");
-                complete &= validateRegex("serverPwd", pattern_pwd, "Letters, numbers and !@#$%^&*_+?-");
+                if (!validateRegex("serverDb", pattern_db, "Alphanumeric database name required")) reasons.push("Database Name");
+                if (!validateRegex("serverRetp", pattern_retp, "Must be Alphanumeric")) reasons.push("Retention Policy");
+                if (!validateRegex("serverUser", pattern_user, "Must be Alphanumeric")) reasons.push("User");
+                if (!validateRegex("serverPwd", pattern_pwd, "Letters, numbers and !@#$%^&*_+?-")) reasons.push("Password");
                 if (serverConfig.retp == "") serverConfig.retp = undefined;
                 if (serverConfig.user == "") serverConfig.user = undefined;
                 if (serverConfig.pwd == "") serverConfig.pwd = undefined;
             } else {
-                complete &= validateRegex("serverBucket", pattern_bucket, "Alphanumeric._- bucket name required.");
-                complete &= validateRegex("serverOrgID", pattern_org, "16 character hex orgID required.");
-                complete &= validateRegex("serverAuthToken", pattern_token, "88 character authorization token required.");
+                if (!validateRegex("serverBucket", pattern_bucket, "Alphanumeric._- bucket name required.")) reasons.push("Bucket");
+                if (!validateRegex("serverOrgID", pattern_org, "16 character hex orgID required.")) reasons.push("Org ID");
+                if (!validateRegex("serverAuthToken", pattern_token, "88 character authorization token required.")) reasons.push("Auth Token");
             }
-            complete &= validateRegex("serverMeas", pattern_meas, "enter a string or $name, $units, if not specified $name will be used.");
-            complete &= validateRegex("serverFkey", pattern_fkey, "enter a string or $name, $units. if not specified, 'value' will be used.");
+            if (!validateRegex("serverMeas", pattern_meas, "enter a string or $name, $units, if not specified $name will be used.")) reasons.push("Measurement");
+            if (!validateRegex("serverFkey", pattern_fkey, "enter a string or $name, $units. if not specified, 'value' will be used.")) reasons.push("Field Key");
             if (serverConfig.measurement == "") serverConfig.measurement = undefined;
             if (serverConfig.fieldkey == "") serverConfig.fieldkey = undefined;
-            if (!validateInput("serverBegd", false)) complete = false;
-            if (serverConfig.outputs.length == 0) complete = false;
-            EbyId("serverSave").style.display = complete ? "inline" : "none";
+            if (!validateInput("serverBegd", false)) reasons.push("Begin Date");
+            if (serverConfig.outputs.length == 0) reasons.push("No Outputs");
+            updateServerSaveButton(reasons);
         }
 
         function deleteInfluxdb() {
@@ -2775,16 +2796,18 @@
         }
 
         function checkPVOutput() {
-            var complete = false;
+            var reasons = [];
+            var hasOutput = false;
             for (i in config.pvoutput.outputs) {
                 if (config.pvoutput.outputs[i].name == "consumption" || config.pvoutput.outputs[i].name == "generation") {
-                    complete = true;
+                    hasOutput = true;
                 }
             }
-            if (!validateInput("apiKey")) complete = false;
-            if (!validateInput("systemId", true)) complete = false;
-            if (!validateInput("serverBegd", false)) complete = false;
-            EbyId("serverSave").style.display = complete ? "inline" : "none";
+            if (!hasOutput) reasons.push("Consumption or Generation output required");
+            if (!validateInput("apiKey")) reasons.push("API Key");
+            if (!validateInput("systemId", true)) reasons.push("System ID");
+            if (!validateInput("serverBegd", false)) reasons.push("Begin Date");
+            updateServerSaveButton(reasons);
             if (config.pvoutput.reload != undefined && config.pvoutput.reload == false) {
                 config.pvoutput.reload = undefined;
             }
