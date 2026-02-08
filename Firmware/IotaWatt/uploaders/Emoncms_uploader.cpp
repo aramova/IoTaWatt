@@ -1,21 +1,22 @@
-#include "emoncms_uploader.h"
+#include "Emoncms_Uploader.h"
+Uploader*emoncms = nullptr;
 
 /*****************************************************************************************
  *          handle_query_s()
  * **************************************************************************************/
-uint32_t emoncms_uploader::handle_query_s(){
+uint32_t Emoncms_uploader::handle_query_s(){
     trace(T_Emoncms,20);
     String endpoint = "/input/get?node=";
     endpoint += _node;
     _encrypted = false;
-    HTTPPost(endpoint.c_str(), checkQuery_s, "application/x-www-form-urlencoded");
+    HTTPGet(endpoint.c_str(), checkQuery_s);
     return 1;
 }
 
 /*****************************************************************************************
  *          handle_checkQuery_s()
  * **************************************************************************************/
-uint32_t emoncms_uploader::handle_checkQuery_s(){
+uint32_t Emoncms_uploader::handle_checkQuery_s(){
     trace(T_Emoncms,30);
     if(_request->responseHTTPcode() != 200){
         log("%s: Query failed %d", _id, _request->responseHTTPcode());
@@ -55,7 +56,7 @@ uint32_t emoncms_uploader::handle_checkQuery_s(){
 /*****************************************************************************************
  *          handle_write_s())
  * **************************************************************************************/
-uint32_t emoncms_uploader::handle_write_s(){
+uint32_t Emoncms_uploader::handle_write_s(){
     trace(T_Emoncms,60);
     
     // This is the predominant state of the uploader
@@ -196,12 +197,14 @@ uint32_t emoncms_uploader::handle_write_s(){
     }
 
     // Encrypted protocol, encrypt the payload
+    // Note: beginning with firmware 02_09_00, the Crypto library no longer provides AES128CBC.
+    // The code here has been changed to blockchain the input and use AES128 to produce AES128CBC output.
 
     trace(T_Emoncms,70);  
     
-    uint8_t iv[16];
+    uint8_t IV[16];
     for (int i = 0; i < 16; i++){
-        iv[i] = random(256);
+        IV[i] = random(256);
     }
 
         // Initialize sha256, shaHMAC and cypher
@@ -211,32 +214,52 @@ uint32_t emoncms_uploader::handle_write_s(){
     sha256->reset();
     SHA256* shaHMAC = new SHA256;
     shaHMAC->resetHMAC(_cryptoKey,16);
-    CBC<AES128>* cypher = new CBC<AES128>;
-    cypher->setIV(iv, 16);
+    AES128* cypher = new AES128;
     cypher->setKey(_cryptoKey, 16);
-
-    // Process payload while
-    // updating SHAs and encrypting. 
-
-    trace(T_Emoncms,70);     
-    uint8_t* temp = new uint8_t[64+16];
     size_t supply = reqData.available();
-    reqData.write(iv, 16);
+    reqData.write(IV, 16);
+
+    // Now chain the blocks and encrypt with AES128
+    
+    trace(T_Emoncms,70);     
+    uint8_t* temp = new uint8_t[16+16];
     while(supply){
-        size_t len = supply < 64 ? supply : 64;
+        size_t len = MIN(supply, 16);
         reqData.read(temp, len);
         supply -= len;
         sha256->update(temp, len);
         shaHMAC->update(temp, len);
-        if(len < 64 || supply == 0){
-            size_t padlen = 16 - (len % 16);
+        size_t padlen = 0;
+        
+            // if end of input,
+            // add padding.
+
+        if(!supply){
+            padlen = 16 - (len % 16);
             for(int i=0; i<padlen; i++){
                 temp[len+i] = padlen;
             }
             len += padlen;
         }
-        cypher->encrypt(temp, temp, len);
-        reqData.write(temp, len);
+        for (int i = 0; i < 16; i++){
+            IV[i] ^= temp[i];
+        }
+
+            // encrypt and output.
+            
+        cypher->encryptBlock(IV, IV);
+        reqData.write(IV, 16);
+
+            // if full block of padding,
+            // add the extra block.
+
+        if(padlen == 16){
+            for (int i = 0; i < 16; i++){
+                IV[i] ^= temp[16 + i];
+            }
+            cypher->encryptBlock(IV, IV);
+            reqData.write(IV, 16);
+        }
     }
     trace(T_Emoncms,70);
     delete[] temp;
@@ -265,7 +288,7 @@ uint32_t emoncms_uploader::handle_write_s(){
 /*****************************************************************************************
  *          handle_checkWrite_s()
  * **************************************************************************************/
-uint32_t emoncms_uploader::handle_checkWrite_s(){
+uint32_t Emoncms_uploader::handle_checkWrite_s(){
     trace(T_Emoncms,91);
 
     // Check the result of a write transaction.
@@ -308,7 +331,7 @@ uint32_t emoncms_uploader::handle_checkWrite_s(){
 /*****************************************************************************************
  *          setRequestHeaders()
  * **************************************************************************************/
-void emoncms_uploader::setRequestHeaders(){
+void Emoncms_uploader::setRequestHeaders(){
     trace(T_Emoncms,95);
     if(_encrypted){
         String auth(_userID);
@@ -332,7 +355,7 @@ void emoncms_uploader::setRequestHeaders(){
 //               CCC     OOO    N   N   F       III    GGG    CCC   B BBB
 //
 //********************************************************************************************************************
-bool emoncms_uploader::configCB(JsonObject& config){
+bool Emoncms_uploader::configCB(JsonObject& config){
     
     trace(T_Emoncms,100);
     const char *apikey = config["apikey"].as<char *>();
