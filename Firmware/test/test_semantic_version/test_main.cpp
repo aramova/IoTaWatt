@@ -45,26 +45,37 @@ void test_parse_version_ignores_extra_components(void) {
 }
 
 void test_parse_invalid_characters(void) {
-    // "a.b.c" -> 0.0.0
+    // "a.b.c" -> 0.0.0 is technically what strtol does if it fails to parse anything.
+    // However, strtol returns 0 if it can't perform conversion.
+    // "a" -> 0.
     TEST_ASSERT_EQUAL_INT32(0x000000, parseSemanticVersion("a.b.c"));
 }
 
 void test_parse_overflow_behavior(void) {
-    // "0.256.0" -> 0x00010000 (1.0.0) due to overflow addition
-    // This documents current behavior, even if potentially undesirable.
-    TEST_ASSERT_EQUAL_INT32(0x010000, parseSemanticVersion("0.256.0"));
+    // "0.256.0" -> Should now return -1 because 256 > 255
+    TEST_ASSERT_EQUAL_INT32(-1, parseSemanticVersion("0.256.0"));
 }
 
 void test_parse_negative_major(void) {
-    // "-1.0.0" -> result is negative
-    int32_t res = parseSemanticVersion("-1.0.0");
-    TEST_ASSERT_TRUE(res < 0);
+    // "-1.0.0" -> result is -1
+    TEST_ASSERT_EQUAL_INT32(-1, parseSemanticVersion("-1.0.0"));
 }
 
 void test_parse_negative_minor(void) {
-    // "0.-1.0" -> result is negative
-    int32_t res = parseSemanticVersion("0.-1.0");
-    TEST_ASSERT_TRUE(res < 0);
+    // "0.-1.0" -> result is -1
+    TEST_ASSERT_EQUAL_INT32(-1, parseSemanticVersion("0.-1.0"));
+}
+
+void test_parse_major_too_large(void) {
+    TEST_ASSERT_EQUAL_INT32(-1, parseSemanticVersion("256.0.0"));
+}
+
+void test_parse_minor_too_large(void) {
+    TEST_ASSERT_EQUAL_INT32(-1, parseSemanticVersion("0.256.0"));
+}
+
+void test_parse_patch_too_large(void) {
+    TEST_ASSERT_EQUAL_INT32(-1, parseSemanticVersion("0.0.256"));
 }
 
 int main(void) {
@@ -81,5 +92,8 @@ int main(void) {
     RUN_TEST(test_parse_overflow_behavior);
     RUN_TEST(test_parse_negative_major);
     RUN_TEST(test_parse_negative_minor);
+    RUN_TEST(test_parse_major_too_large);
+    RUN_TEST(test_parse_minor_too_large);
+    RUN_TEST(test_parse_patch_too_large);
     return UNITY_END();
 }
