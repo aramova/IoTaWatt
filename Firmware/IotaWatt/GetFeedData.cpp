@@ -167,7 +167,7 @@ uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
       
       server.setContentLength(CONTENT_LENGTH_UNKNOWN);
       server.send(200,"application/octet-stream","");
-      strcpy(rowBuf, "[");
+      snprintf(rowBuf, chunkSize+8, "[");
       UnixTime = startUnixTime;
       state = process;
     }
@@ -318,7 +318,7 @@ uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
         bufPos += rowLen;
         
         // Prepare for next iteration
-        strcpy(rowBuf, ",");
+        snprintf(rowBuf, chunkSize+8, ",");
       }
       trace(T_GFD,7);
 
@@ -332,7 +332,11 @@ uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
           rowBuf[1] = '\0';
       } else {
           // Can happen if loop never ran
-          strcat(rowBuf, "]");
+          int currentLen = strlen(rowBuf);
+          int remaining = (chunkSize + 8) - currentLen;
+          if (remaining > 0) {
+            snprintf(rowBuf + currentLen, remaining, "]");
+          }
       }
 
       size_t finalLen = strlen(rowBuf);
