@@ -6,6 +6,8 @@
  * 
  * *******************************************************************************************************/
 
+#include <semantic_version.h>
+
 int strcmp_ci(const char*, const char*);            // Case insensitive strcmp()
 
 char* charstar(const char* str, const char *str2 = nullptr);                    // Create a new char* array...
@@ -34,5 +36,4 @@ bool    copyFile(const char* dest, const char* source);  // Copy a file
 
 void hashFile(uint8_t* sha, File file);             // Get SHA256 hash of a file
 
-int32_t parseSemanticVersion(const char *);
 String   displaySemanticVersion(int32_t);
