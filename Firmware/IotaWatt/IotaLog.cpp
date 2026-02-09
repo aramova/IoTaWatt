@@ -51,15 +51,16 @@ int IotaLog::begin (const char* path ){
 			// If there are trailing zero recordKeys at the end,
 			// try to adjust _filesize down to match logical end of file.
 
-	while(_fileSize && _lastSerial == 0){
-		IotaLogRecord* logRec = new IotaLogRecord;
-		_fileSize -= _recordSize;
-		IotaFile.seek(_fileSize - _recordSize);
-		IotaFile.read((uint8_t*)logRec, _recordSize);
-		_lastSerial = logRec->serial;
-		_lastKey = logRec->UNIXtime;
-		_entries--;	 
-		delete logRec;
+	if(_fileSize && _lastSerial == 0){
+		IotaLogRecord logRec;
+		while(_fileSize && _lastSerial == 0){
+			_fileSize -= _recordSize;
+			IotaFile.seek(_fileSize - _recordSize);
+			IotaFile.read((uint8_t*)&logRec, _recordSize);
+			_lastSerial = logRec.serial;
+			_lastKey = logRec.UNIXtime;
+			_entries--;
+		}
 	}
 	
 	if(_firstKey > _lastKey){
