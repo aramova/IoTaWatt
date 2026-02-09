@@ -62,7 +62,9 @@ uint32_t getFeedData(struct serviceBlock* _serviceBlock){
   static uint32_t startTime;
   static bool     modeRequest;
   enum   states   {setup, process} static state = setup;
-       
+
+  uint32_t sliceStartTime = millis();
+
   switch (state) {
     
     case setup: {
@@ -174,7 +176,6 @@ uint32_t getFeedData(struct serviceBlock* _serviceBlock){
   
     case process: {
       trace(T_GFD,1);
-      uint32_t sliceStartTime = millis();
 
           // Loop to generate entries
       
