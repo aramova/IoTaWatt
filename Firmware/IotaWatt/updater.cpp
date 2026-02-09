@@ -556,6 +556,12 @@ bool copyUpdate(String version){
     log("Updater: Installing %s", inFile.name());
     SD.remove(inFile.name());
     File outFile = SD.open(inFile.name(), FILE_WRITE);
+    if (!outFile) {
+      log("Updater: Unable to open %s for writing", inFile.name());
+      inFile.close();
+      updtDir.close();
+      return false;
+    }
     uint32_t fileSize = inFile.size();
     while(fileSize){
       int chunk = MIN(fileSize, buffSize);
