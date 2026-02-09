@@ -188,33 +188,34 @@ void IotaLog::searchKey(IotaLogRecord* callerRecord, const uint32_t key, const u
 			}
 			hKey = callerRecord->UNIXtime;
 			hSerial = callerRecord->serial;
-			continue;
 		}
-		if(floorSerial > lSerial){
+		else if(floorSerial > lSerial){
 			readSerial(callerRecord, floorSerial);
 			if(callerRecord->UNIXtime == key){
 				return;
 			}
 			lKey = callerRecord->UNIXtime;
 			lSerial = callerRecord->serial;
-			continue;
 		}
-		if((hSerial - lSerial) <= 1){
+		else if((hSerial - lSerial) <= 1){
 			readSerial(callerRecord, lSerial);
 			return;
 		}
-		readSerial(callerRecord, (lSerial + hSerial) / 2);
-		_readKeyIO++;
-		if(callerRecord->UNIXtime == key){
-			return;
+		else {
+			readSerial(callerRecord, (lSerial + hSerial) / 2);
+			_readKeyIO++;
+			if(callerRecord->UNIXtime == key){
+				return;
+			}
+			if(callerRecord->UNIXtime < key){
+				lKey = callerRecord->UNIXtime;
+				lSerial = callerRecord->serial;
+			}
+			else {
+				hKey = callerRecord->UNIXtime;
+				hSerial = callerRecord->serial;
+			}
 		}
-		if(callerRecord->UNIXtime < key){
-			lKey = callerRecord->UNIXtime;
-			lSerial = callerRecord->serial;
-			continue;
-		}
-		hKey = callerRecord->UNIXtime;
-		hSerial = callerRecord->serial;
 	}
 }
 
