@@ -560,6 +560,7 @@ bool copyUpdate(String version){
       log("Updater: Unable to open %s for writing", inFile.name());
       inFile.close();
       updtDir.close();
+      delete[] buff;
       return false;
     }
     uint32_t fileSize = inFile.size();
