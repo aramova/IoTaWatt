@@ -169,44 +169,53 @@ int IotaLog::readKey (IotaLogRecord* callerRecord){
 }
 
 void IotaLog::searchKey(IotaLogRecord* callerRecord, const uint32_t key, const uint32_t lowKey, const int32_t lowSerial, const uint32_t highKey, const int32_t highSerial){
+	uint32_t lKey = lowKey;
+	int32_t lSerial = lowSerial;
+	uint32_t hKey = highKey;
+	int32_t hSerial = highSerial;
 
-  	int32_t floorSerial = max(lowSerial, highSerial - (int32_t)((highKey - key) / _interval));
-	int32_t ceilingSerial = min(highSerial, lowSerial + (int32_t)((key - lowKey) / _interval));
+	while(true){
+		int32_t floorSerial = max(lSerial, hSerial - (int32_t)((hKey - key) / _interval));
+		int32_t ceilingSerial = min(hSerial, lSerial + (int32_t)((key - lKey) / _interval));
 
-	//Serial.printf("low %d(%d), high %d(%d), floor %d, Ceiling %d\r\n", lowKey, lowSerial, highKey, highSerial,floorSerial, ceilingSerial); 
+		//Serial.printf("low %d(%d), high %d(%d), floor %d, Ceiling %d\r\n", lKey, lSerial, hKey, hSerial,floorSerial, ceilingSerial);
 
-  	if(ceilingSerial < highSerial || floorSerial == ceilingSerial){
-		readSerial(callerRecord, ceilingSerial);
-		
+		if(ceilingSerial < hSerial || floorSerial == ceilingSerial){
+			readSerial(callerRecord, ceilingSerial);
+
+			if(callerRecord->UNIXtime == key){
+				return;
+			}
+			hKey = callerRecord->UNIXtime;
+			hSerial = callerRecord->serial;
+			continue;
+		}
+		if(floorSerial > lSerial){
+			readSerial(callerRecord, floorSerial);
+			if(callerRecord->UNIXtime == key){
+				return;
+			}
+			lKey = callerRecord->UNIXtime;
+			lSerial = callerRecord->serial;
+			continue;
+		}
+		if((hSerial - lSerial) <= 1){
+			readSerial(callerRecord, lSerial);
+			return;
+		}
+		readSerial(callerRecord, (lSerial + hSerial) / 2);
+		_readKeyIO++;
 		if(callerRecord->UNIXtime == key){
 			return;
 		}
-		searchKey(callerRecord, key, lowKey, lowSerial, callerRecord->UNIXtime, callerRecord->serial);
-		return;
-	}
-	if(floorSerial > lowSerial){
-		readSerial(callerRecord, floorSerial);
-		if(callerRecord->UNIXtime == key){
-			return;
+		if(callerRecord->UNIXtime < key){
+			lKey = callerRecord->UNIXtime;
+			lSerial = callerRecord->serial;
+			continue;
 		}
-		searchKey(callerRecord, key, callerRecord->UNIXtime, callerRecord->serial, highKey, highSerial);
-		return;
+		hKey = callerRecord->UNIXtime;
+		hSerial = callerRecord->serial;
 	}
-	if((highSerial - lowSerial) <= 1){		
-		readSerial(callerRecord, lowSerial);
-		return;
-	}
-	readSerial(callerRecord, (lowSerial + highSerial) / 2);
-	_readKeyIO++;
-	if(callerRecord->UNIXtime == key){
-		return;
-	}
-	if(callerRecord->UNIXtime < key){
-		searchKey(callerRecord, key, callerRecord->UNIXtime, callerRecord->serial, highKey, highSerial);
-		return;
-  }
-  searchKey(callerRecord, key, lowKey, lowSerial, callerRecord->UNIXtime, callerRecord->serial);
-  return;
 }
 
 int IotaLog::readNext(IotaLogRecord* callerRecord){
