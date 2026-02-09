@@ -231,9 +231,6 @@ int sampleCycle(IotaInputChannel *Vchannel, IotaInputChannel *Ichannel, int cycl
   sumIsq = 0;
   sumVI = 0;
   for(int i=0; i<samples; i++){
-    if(*IsamplePtr == -1 || *IsamplePtr == 1){
-      *IsamplePtr == 0;
-    }
     sumV += *VsamplePtr;
     sumI += *IsamplePtr;
     if(Vreverse) *VsamplePtr = - *VsamplePtr;
