@@ -8,8 +8,10 @@ int strcmp_ci(const char* str1, const char* str2){
     const char* char2 = str2;
     while(*char1 || *char2){
         if(*(char1++) != *(char2++)){
-            if(toupper(*(char1-1)) > toupper(*(char2-1))) return +1;
-            if(toupper(*(char1-1)) < toupper(*(char2-1))) return -1;
+            int c1 = toupper((unsigned char)*(char1-1));
+            int c2 = toupper((unsigned char)*(char2-1));
+            if(c1 > c2) return +1;
+            if(c1 < c2) return -1;
         }
     }
     return 0;
