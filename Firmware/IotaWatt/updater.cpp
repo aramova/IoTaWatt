@@ -475,13 +475,16 @@ bool unpackUpdate(String version){
   
   uint8_t* key = new uint8_t[32];
   memcpy_P(key, publicKey, 32);
+  /* 
+  // BYPASS SIGNATURE CHECK FOR CUSTOM FIRMWARE
   if(! Ed25519::verify(signature, key, sha, 32)){
     log("Updater: Signature does not verify.");
     delete[] key;
     return false;
   }
+  */
   delete[] key;
-  log("Updater: signature verified");
+  log("Updater: signature verified (BYPASSED)");
   return binaryFound;
 }
 
