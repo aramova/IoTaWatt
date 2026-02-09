@@ -77,8 +77,7 @@ const document = {
     body: {
         appendChild: function() {},
         removeChild: function() {}
-    },
-    title: ''
+    }
 };
 
 // Sandbox context
@@ -100,7 +99,7 @@ const sandbox = {
         };
     }
 };
-sandbox.moment.unix = function() { return { format: function() {} }; };
+sandbox.moment.unix = function() { return { format: function() { return '2023-01-01T00:00:00Z'; } }; };
 
 // Create context and run script
 vm.createContext(sandbox);
