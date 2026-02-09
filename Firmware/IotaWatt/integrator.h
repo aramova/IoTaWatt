@@ -40,7 +40,7 @@ class integrator {
         IotaLog *_log;                  // integration log
         IotaLogRecord *_oldRec;         // datalog records used during synchronization
         IotaLogRecord *_newRec;
-        IotaLogRecord m_rec1, m_rec2;   // Embedded storage for records
+        IotaLogRecord _rec1, _rec2;     // Embedded storage for records
         bool _processingCatchUp;        // Flag to indicate if catch-up sequence is active
 
         struct intRecord {

@@ -114,8 +114,8 @@ uint32_t integrator::handle_integrate_s(){
 
         if(!_processingCatchUp){
             _processingCatchUp = true;
-            _oldRec = &m_rec1;
-            _newRec = &m_rec2;
+            _oldRec = &_rec1;
+            _newRec = &_rec2;
             _newRec->UNIXtime = _intRec.UNIXtime;
             Current_log.readKey(_newRec);
         }
