@@ -1,4 +1,4 @@
-#include "Emoncms_uploader.h"
+#include "Emoncms_Uploader.h"
 Uploader*emoncms = nullptr;
 
 /*****************************************************************************************
@@ -202,8 +202,10 @@ uint32_t Emoncms_uploader::handle_write_s(){
 
     trace(T_Emoncms,70);  
     
-    alignas(uint32_t) uint8_t IV[16];
-    getNonce(IV);
+    uint8_t IV[16];
+    for (int i = 0; i < 16; i++){
+        IV[i] = random(256);
+    }
 
         // Initialize sha256, shaHMAC and cypher
 

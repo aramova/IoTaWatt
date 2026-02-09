@@ -48,6 +48,8 @@ integrator::~integrator(){
     log("%s: Integration log %s deleted.", _id, _name);
     delete _log;
     delete[] _name;
+    delete _oldRec;
+    delete _newRec;
 };
 
 uint32_t integrator::handle_initialize_s(){
@@ -112,10 +114,9 @@ uint32_t integrator::handle_integrate_s(){
 
     while(Current_log.lastKey() >= _intRec.UNIXtime + _interval){
 
-        if(!_processingCatchUp){
-            _processingCatchUp = true;
-            _oldRec = &_rec1;
-            _newRec = &_rec2;
+        if(!_oldRec){
+            _oldRec = new IotaLogRecord;
+            _newRec = new IotaLogRecord;
             _newRec->UNIXtime = _intRec.UNIXtime;
             Current_log.readKey(_newRec);
         }
@@ -157,7 +158,10 @@ uint32_t integrator::handle_integrate_s(){
         }
     }
     
-    _processingCatchUp = false;
+    delete _oldRec;
+    _oldRec = nullptr;
+    delete _newRec;
+    _newRec = nullptr;
     _log->writeCache(false);
     _synchronized = true;
     return 0;
