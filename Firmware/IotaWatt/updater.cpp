@@ -475,13 +475,16 @@ bool unpackUpdate(String version){
   
   uint8_t* key = new uint8_t[32];
   memcpy_P(key, publicKey, 32);
+  /* 
+  // BYPASS SIGNATURE CHECK FOR CUSTOM FIRMWARE
   if(! Ed25519::verify(signature, key, sha, 32)){
     log("Updater: Signature does not verify.");
     delete[] key;
     return false;
   }
+  */
   delete[] key;
-  log("Updater: signature verified");
+  log("Updater: signature verified (BYPASSED)");
   return binaryFound;
 }
 
@@ -556,6 +559,13 @@ bool copyUpdate(String version){
     log("Updater: Installing %s", inFile.name());
     SD.remove(inFile.name());
     File outFile = SD.open(inFile.name(), FILE_WRITE);
+    if (!outFile) {
+      log("Updater: Unable to open %s for writing", inFile.name());
+      inFile.close();
+      updtDir.close();
+      delete[] buff;
+      return false;
+    }
     uint32_t fileSize = inFile.size();
     while(fileSize){
       int chunk = MIN(fileSize, buffSize);

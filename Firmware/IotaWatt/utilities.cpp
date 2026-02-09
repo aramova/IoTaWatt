@@ -8,8 +8,10 @@ int strcmp_ci(const char* str1, const char* str2){
     const char* char2 = str2;
     while(*char1 || *char2){
         if(*(char1++) != *(char2++)){
-            if(toupper(*(char1-1)) > toupper(*(char2-1))) return +1;
-            if(toupper(*(char1-1)) < toupper(*(char2-1))) return -1;
+            int c1 = toupper((unsigned char)*(char1-1));
+            int c2 = toupper((unsigned char)*(char2-1));
+            if(c1 > c2) return +1;
+            if(c1 < c2) return -1;
         }
     }
     return 0;
@@ -415,23 +417,6 @@ bool copyFile(const char* dest, const char* source){
         outFile.close();
     }
     return true;
-}
-
-int32_t parseSemanticVersion(const char * ver){
-    if(! ver){
-        return -1;
-    }
-    char * ptr;
-    long result = strtol(ver, &ptr, 10) << 16;
-    if(*ptr == '.' || *ptr == '_'){
-        long node = strtol(++ptr, &ptr, 10);
-        result += node << 8;
-        if(*ptr == '.' || *ptr == '_'){
-            long node = strtol(++ptr, &ptr, 10);
-            result += node;
-        }
-    }
-    return result;
 }
 
 String   displaySemanticVersion(int32_t ver){

@@ -850,7 +850,7 @@ void handleGetFeedList(){
 
 void handleGetFeedData(){
   serverAvailable = false;
-  getFeedData();
+  NewService(getFeedData);
   return;
 }
 
