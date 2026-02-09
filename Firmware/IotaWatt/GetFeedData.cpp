@@ -51,7 +51,7 @@ uint32_t getFeedData(struct serviceBlock* _serviceBlock){
   static size_t   chunkSize = 1600;
   static char* buf = nullptr;
   static size_t bufPos = 0;
-  static String*  replyData = nullptr;
+  static char*    rowBuf = nullptr;
   static req*     reqRoot = nullptr;
   static uint32_t startUnixTime;
   static uint32_t endUnixTime;
@@ -163,13 +163,13 @@ uint32_t getFeedData(struct serviceBlock* _serviceBlock){
 
       buf = new char[chunkSize+8];
       bufPos = 6;
-      replyData = new String();
+      rowBuf = new char[chunkSize+8];
       
           // Setup buffer to do it "chunky-style"
       
       server.setContentLength(CONTENT_LENGTH_UNKNOWN);
       server.send(200,"application/octet-stream","");
-      *replyData= "[";
+      snprintf(rowBuf, chunkSize+8, "[");
       UnixTime = startUnixTime;
       state = process;
     }
@@ -188,64 +188,120 @@ uint32_t getFeedData(struct serviceBlock* _serviceBlock){
         logRecord->UNIXtime = UnixTime;
         logReadKey(logRecord);
         trace(T_GFD,2);
-        *replyData += '[';  //  + String(UnixTime) + "000,";
+
+        char* p = rowBuf + strlen(rowBuf);
+        *p++ = '[';
+
         double elapsedHours = logRecord->logHours - lastRecord->logHours;
         req* reqPtr = reqRoot;
         while((reqPtr = reqPtr->next) != nullptr){
           int channel = reqPtr->channel;
+          int remaining = (rowBuf + chunkSize + 8) - p;
+
+          // Safety check for buffer space
+          if (remaining <= 0) remaining = 0;
+
           if(rtc || logRecord->logHours == lastRecord->logHours){
-            *replyData +=  "null";
+            if (remaining > 0) {
+                int len = snprintf(p, remaining, "null");
+                if (len > 0) p += MIN(len, remaining - 1);
+            }
           }
   
             // input channel
 
           else if(channel >= 0){
-            trace(T_GFD,3);       
+            trace(T_GFD,3);
+            double val = 0;
+            int precision = 1;
+            bool isNull = false;
+
             if(reqPtr->queryType == 'V') {
-              *replyData += String((logRecord->accum1[channel] - lastRecord->accum1[channel]) / elapsedHours,1);
+              val = (logRecord->accum1[channel] - lastRecord->accum1[channel]) / elapsedHours;
+              precision = 1;
             } 
             else if(reqPtr->queryType == 'P') {
-              *replyData += String((logRecord->accum1[channel] - lastRecord->accum1[channel]) / elapsedHours,1);
+              val = (logRecord->accum1[channel] - lastRecord->accum1[channel]) / elapsedHours;
+              precision = 1;
             }
             else if(reqPtr->queryType == 'E') {
-                *replyData += String((logRecord->accum1[channel] / 1000.0),3);              
+                val = (logRecord->accum1[channel] / 1000.0);
+                precision = 3;
             } 
             else {
-              *replyData += "null";
-            } 
+              isNull = true;
+            }
+
+            if (remaining > 0) {
+                int len = 0;
+                if (isNull || isnan(val) || isinf(val)) {
+                     len = snprintf(p, remaining, "null");
+                } else {
+                     len = snprintf(p, remaining, "%.*f", precision, val);
+                }
+                if (len > 0) p += MIN(len, remaining - 1);
+            }
           }
   
            // output channel
           
           else {
             trace(T_GFD,4);
-            if(reqPtr->output == nullptr){
-              *replyData += "null";
-            }
-            else if(reqPtr->queryType == 'V'){
-              *replyData += String(reqPtr->output->run(lastRecord, logRecord, Volts), 1);
-            }
-            else if(reqPtr->queryType == 'P'){
-              *replyData += String(reqPtr->output->run(lastRecord, logRecord, Watts), 1);
-            }
-            else if(reqPtr->queryType == 'E'){
-                *replyData += String(reqPtr->output->run(nullptr, logRecord, kWh), 3);
-            }
-            else if(reqPtr->queryType == 'O'){
-              *replyData += String(reqPtr->output->run(lastRecord, logRecord), reqPtr->output->precision());
-            }
-            else {
-              *replyData += "null";
+            if (remaining > 0) {
+                int len = 0;
+                if(reqPtr->output == nullptr){
+                  len = snprintf(p, remaining, "null");
+                }
+                else {
+                    double val = 0;
+                    int precision = 1;
+
+                    if(reqPtr->queryType == 'V'){
+                      val = reqPtr->output->run(lastRecord, logRecord, Volts);
+                      precision = 1;
+                    }
+                    else if(reqPtr->queryType == 'P'){
+                      val = reqPtr->output->run(lastRecord, logRecord, Watts);
+                      precision = 1;
+                    }
+                    else if(reqPtr->queryType == 'E'){
+                        val = reqPtr->output->run(nullptr, logRecord, kWh);
+                        precision = 3;
+                    }
+                    else if(reqPtr->queryType == 'O'){
+                      val = reqPtr->output->run(lastRecord, logRecord);
+                      precision = reqPtr->output->precision();
+                    }
+                    else {
+                      val = NAN; // force null
+                    }
+
+                    if (isnan(val) || isinf(val)) {
+                        len = snprintf(p, remaining, "null");
+                    } else {
+                        len = snprintf(p, remaining, "%.*f", precision, val);
+                    }
+                }
+                if (len > 0) p += MIN(len, remaining - 1);
             }
           }
-          if(replyData->endsWith("NaN") || replyData->endsWith("inf")){
-            replyData->remove(replyData->length()-3);
-            *replyData += "null";
+
+          // Add comma
+          if ((rowBuf + chunkSize) - p > 1) {
+              *p++ = ',';
+              *p = '\0';
           }
-          *replyData += ',';
         } 
            
-        replyData->setCharAt(replyData->length()-1,']');
+        // Replace last comma with ]
+        if (*(p-1) == ',') {
+            *(p-1) = ']';
+        } else {
+             // Should not happen if loop ran, but if empty loop:
+             *p++ = ']';
+             *p = '\0';
+        }
+
         IotaLogRecord* swapRecord = lastRecord;
         lastRecord = logRecord;
         logRecord = swapRecord;
@@ -254,7 +310,9 @@ uint32_t getFeedData(struct serviceBlock* _serviceBlock){
             // If not enough room in buffer for this segment, 
             // Write the buffer chunk.
 
-        if((bufPos + replyData->length()) > (chunkSize - 3)){
+        size_t rowLen = p - rowBuf;
+
+        if((bufPos + rowLen) > (chunkSize - 3)){
           sendChunk(buf, bufPos);
           bufPos = 6;
         }    
@@ -262,23 +320,38 @@ uint32_t getFeedData(struct serviceBlock* _serviceBlock){
             // Add this segment to buf.
 
         trace(T_GFD,5);
-        memcpy(buf + bufPos, replyData->c_str(), replyData->length());
-        bufPos += replyData->length();
-        replyData->remove(0);
+        memcpy(buf + bufPos, rowBuf, rowLen);
+        bufPos += rowLen;
         
-        *replyData += ',';
+        // Prepare for next iteration
+        snprintf(rowBuf, chunkSize+8, ",");
       }
       trace(T_GFD,7);
 
           // All entries generated, terminate Json and send.
       
-      replyData->setCharAt(replyData->length()-1,']');
-      memcpy(buf + bufPos, replyData->c_str(), replyData->length());
-      bufPos += replyData->length();
+      // Close the array
+      // replyData->setCharAt(replyData->length()-1,']');
+      // Here rowBuf has "," from end of loop. We need to replace comma with ].
+      if (rowBuf[0] == ',') {
+          rowBuf[0] = ']';
+          rowBuf[1] = '\0';
+      } else {
+          // Can happen if loop never ran
+          int currentLen = strlen(rowBuf);
+          int remaining = (chunkSize + 8) - currentLen;
+          if (remaining > 0) {
+            snprintf(rowBuf + currentLen, remaining, "]");
+          }
+      }
+
+      size_t finalLen = strlen(rowBuf);
+      memcpy(buf + bufPos, rowBuf, finalLen);
+      bufPos += finalLen;
       sendChunk(buf, bufPos);
 
-      delete replyData;
-      replyData = nullptr;
+      delete[] rowBuf;
+      rowBuf = nullptr;
       
           // Send terminating zero chunk, clean up and exit.    
       
