@@ -34,7 +34,7 @@
  *   
  **************************************************************************************************/
 
-uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
+uint32_t getFeedData(struct serviceBlock* _serviceBlock){
   // trace T_GFD
 
   struct req {
@@ -174,10 +174,15 @@ uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
   
     case process: {
       trace(T_GFD,1);
+      uint32_t sliceStartTime = millis();
 
           // Loop to generate entries
       
       while(UnixTime <= endUnixTime) {
+        if((millis() - sliceStartTime) > processInterval) {
+           return 1;
+        }
+
         int rtc;
         logRecord->UNIXtime = UnixTime;
         logReadKey(logRecord);
