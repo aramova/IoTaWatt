@@ -1,0 +1,10 @@
+{
+  "name": "iotawatt-firmware-tests",
+  "version": "1.0.0",
+  "description": "Tests for IoTaWatt Javascript files",
+  "scripts": {
+    "test": "node tests/test_graphoffline.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
