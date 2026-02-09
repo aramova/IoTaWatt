@@ -90,11 +90,7 @@ describe('SD/graphoffline.js', () => {
         context.moment.unix = jest.fn().mockReturnValue({ format: jest.fn() });
 
         vm.createContext(context);
-        try {
-            vm.runInContext(code, context);
-        } catch (e) {
-            console.error("Error loading script:", e);
-        }
+        vm.runInContext(code, context);
     });
 
     describe('unitFormat', () => {

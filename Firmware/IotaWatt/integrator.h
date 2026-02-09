@@ -15,7 +15,6 @@ class integrator {
                         _log(0),
                         _oldRec(0),
                         _newRec(0),
-                        _processingCatchUp(false),
                         _state(initialize_s){};
 
         ~integrator();
@@ -40,8 +39,6 @@ class integrator {
         IotaLog *_log;                  // integration log
         IotaLogRecord *_oldRec;         // datalog records used during synchronization
         IotaLogRecord *_newRec;
-        IotaLogRecord _rec1, _rec2;     // Embedded storage for records
-        bool _processingCatchUp;        // Flag to indicate if catch-up sequence is active
 
         struct intRecord {
             uint32_t UNIXtime;          // Time period represented by this record
