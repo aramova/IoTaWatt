@@ -34,7 +34,7 @@
  *   
  **************************************************************************************************/
 
-uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
+uint32_t getFeedData(struct serviceBlock* _serviceBlock){
   // trace T_GFD
 
   struct req {
@@ -62,7 +62,9 @@ uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
   static uint32_t startTime;
   static bool     modeRequest;
   enum   states   {setup, process} static state = setup;
-       
+
+  uint32_t sliceStartTime = millis();
+
   switch (state) {
     
     case setup: {
@@ -178,6 +180,10 @@ uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
           // Loop to generate entries
       
       while(UnixTime <= endUnixTime) {
+        if((millis() - sliceStartTime) > processInterval) {
+           return 1;
+        }
+
         int rtc;
         logRecord->UNIXtime = UnixTime;
         logReadKey(logRecord);
