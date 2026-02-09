@@ -61,6 +61,8 @@
             <button class="mainMenuButton" onclick="mainMenuButton(this,toolsWiFi)">WIFi</button>
             <button class="mainMenuButton" onclick="mainMenuButton(this,toolsRestart)"
                 title="Restart the IoTaWatt">Restart</button>
+            <button class="mainMenuButton" onclick="mainMenuButton(this,toolsDiscovery)"
+                title="Identify circuits by toggling a load">Discovery Helper</button>
                 
        <!-- <button class="mainMenuButton" onclick="mainMenuButton(this,toolsDatalogs)">Datalogs</button>
             <button class="mainMenuButton" onclick="mainMenuButton(this,toolsUpdate)">Software Update</button>
@@ -367,6 +369,31 @@
                 </p>
                 <h3 id="restartMsg"></h3>
                 <button id="restartButton" onclick="sendRestart()">Restart</button>
+            </div>
+
+            <!-- ****************************** Discovery Helper **********************************-->
+
+            <div id="divDiscovery" class="body tools color_body" style="display:none">
+                <h3>Discovery Helper</h3>
+                <p>
+                    Identify which Input corresponds to a physical circuit.<br>
+                    1. Enter a name for the circuit (e.g. "Kitchen Socket").<br>
+                    2. Click "Start Discovery".<br>
+                    3. Turn on a 600-1000W load (e.g. Hairdryer).<br>
+                    4. Wait for the alert to turn it off.<br>
+                </p>
+
+                <table id="discoveryTable">
+                    <tr>
+                        <td align="right">Circuit Name:</td>
+                        <td><input id="discoveryName" type="text" size="20"></td>
+                    </tr>
+                </table>
+
+                <h3 id="discoveryMsg"></h3>
+                <button id="discoveryStartButton" onclick="startDiscovery()">Start Discovery</button>
+                <button id="discoveryStopButton" onclick="stopDiscovery()" style="display:none">Stop</button>
+                <button class="actionCancel" onclick="currentBodyPop()">Close</button>
             </div>
             <!-- divrestart -->
 
@@ -829,6 +856,108 @@
         /***************************************************************************************************
          *                       Tools
          * ************************************************************************************************/
+        /***************************************************************************************************
+         *                       Discovery Helper
+         * ************************************************************************************************/
+        var discoveryTimer;
+
+        function toolsDiscovery() {
+            EbyId("discoveryMsg").innerHTML = "";
+            EbyId("discoveryName").value = "";
+            EbyId("discoveryStartButton").style.display = "inline";
+            EbyId("discoveryStopButton").style.display = "none";
+            currentBodyPush("divDiscovery");
+        }
+
+        function startDiscovery() {
+            var name = EbyId("discoveryName").value;
+            if (name == "") {
+                alert("Please enter a name.");
+                return;
+            }
+
+            // Heuristic for Mains
+            var mainsMask = 0;
+            for(var i in config.inputs) {
+                if(config.inputs[i] && config.inputs[i].name) {
+                    var n = config.inputs[i].name.toLowerCase();
+                    if (n.indexOf("main") !== -1 ||
+                        n.indexOf("grid") !== -1 ||
+                        n.indexOf("panel") !== -1) {
+                        mainsMask |= (1 << i);
+                    }
+                }
+            }
+
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    EbyId("discoveryMsg").innerHTML = "Scanning... Turn on device (600-1000W).";
+                    EbyId("discoveryStartButton").style.display = "none";
+                    EbyId("discoveryStopButton").style.display = "inline";
+                    discoveryTimer = setInterval(pollDiscovery, 1000);
+                }
+            }
+            xmlHttp.open("GET", "/command?discovery=start&id=" + encodeURIComponent(name) + "&mains=" + mainsMask, true);
+            xmlHttp.send(null);
+        }
+
+        function stopDiscovery() {
+            if (discoveryTimer) clearInterval(discoveryTimer);
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    EbyId("discoveryMsg").innerHTML = "Stopped.";
+                    EbyId("discoveryStartButton").style.display = "inline";
+                    EbyId("discoveryStopButton").style.display = "none";
+                }
+            }
+            xmlHttp.open("GET", "/command?discovery=stop", true);
+            xmlHttp.send(null);
+        }
+
+        function pollDiscovery() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var status = JSON.parse(xmlHttp.responseText);
+                    var msg = EbyId("discoveryMsg");
+
+                    if (status.state == "scanning") {
+                        msg.innerHTML = "Scanning... Turn on device.";
+                    } else if (status.state == "waiting_down") {
+                        msg.innerHTML = "Found potential match! Turn OFF the device now.";
+                    } else if (status.state == "confirmed") {
+                        clearInterval(discoveryTimer);
+                        msg.innerHTML = "Confirmed! Updating configuration...";
+                        // Update config
+                        if (config.inputs[status.candidate]) {
+                            config.inputs[status.candidate].name = EbyId("discoveryName").value;
+                            uploadConfig();
+                            msg.innerHTML = "Success! Input " + status.candidate + " renamed to " + EbyId("discoveryName").value;
+                        } else {
+                            msg.innerHTML = "Error: Invalid candidate " + status.candidate;
+                        }
+                        EbyId("discoveryStartButton").style.display = "inline";
+                        EbyId("discoveryStopButton").style.display = "none";
+                    } else if (status.state == "misc") {
+                        clearInterval(discoveryTimer);
+                        alert("Load detected on Mains but no specific branch circuit. This is a Misc load. Move probes to measure it.");
+                        msg.innerHTML = "Misc load detected.";
+                        EbyId("discoveryStartButton").style.display = "inline";
+                        EbyId("discoveryStopButton").style.display = "none";
+                    } else if (status.state == "timeout") {
+                        clearInterval(discoveryTimer);
+                        msg.innerHTML = "Timed out.";
+                        EbyId("discoveryStartButton").style.display = "inline";
+                        EbyId("discoveryStopButton").style.display = "none";
+                    }
+                }
+            }
+            xmlHttp.open("GET", "/command?discovery=status", true);
+            xmlHttp.send(null);
+        }
+
         function toolsRestart() {
             EbyId("restartMsg").innerHTML = "";
             currentBodyPush("divRestart");

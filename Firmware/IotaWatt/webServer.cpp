@@ -1,5 +1,6 @@
 #include "IotaWatt.h"
 #include "uploaders/Uploader_Registry.h"
+#include "DiscoveryService.h"
 
 
 /*
@@ -773,6 +774,30 @@ void handleCommand(){
     delay(1000);
     ESP.restart();
   }
+
+  if(server.hasArg(F("discovery"))){
+      String action = server.arg(F("discovery"));
+      if(action == "start"){
+          String id = server.arg("id");
+          uint16_t mainsMask = 0;
+          if(server.hasArg("mains")){
+              mainsMask = server.arg("mains").toInt();
+          }
+          discoveryService.start(id, mainsMask);
+          server.send(200, txtPlain_P, "started");
+          return;
+      }
+      if(action == "stop"){
+          discoveryService.stop();
+          server.send(200, txtPlain_P, "stopped");
+          return;
+      }
+      if(action == "status"){
+          server.send(200, appJson_P, discoveryService.status());
+          return;
+      }
+  }
+
   server.send(400, txtPlain_P, F("Unrecognized request"));
 }
 
