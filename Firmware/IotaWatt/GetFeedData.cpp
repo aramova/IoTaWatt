@@ -190,7 +190,7 @@ uint32_t getFeedData(){ //(struct serviceBlock* _serviceBlock){
         req* reqPtr = reqRoot;
         while((reqPtr = reqPtr->next) != nullptr){
           int channel = reqPtr->channel;
-          int remaining = (rowBuf + chunkSize) - p;
+          int remaining = (rowBuf + chunkSize + 8) - p;
 
           // Safety check for buffer space
           if (remaining <= 0) remaining = 0;
