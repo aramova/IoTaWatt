@@ -228,7 +228,7 @@ declare_uploaders();
 
   server.on(F("/edit"), HTTP_POST, returnOK, handleFileUpload);
   server.onNotFound(handleRequest);
-  const char * headerkeys[] = {"X-configSHA256"};
+  const char * headerkeys[] = {"X-configSHA256", "X-CSRF-Token"};
   size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
   server.collectHeaders(headerkeys, headerkeyssize );
   server.begin();

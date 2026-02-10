@@ -556,6 +556,7 @@
         var originalName;
         var timezone = 0;
         var faults = 0;
+        var csrfToken = "";
         var tokens = [{
             oper: "const",
             value: "0"
@@ -679,6 +680,15 @@
             return document.getElementById(id)
         };
 
+        function getCsrfToken() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "/auth/token", false);
+            xmlHttp.send(null);
+            if (xmlHttp.status == 200) {
+                csrfToken = xmlHttp.responseText;
+            }
+        }
+
         /***************************************************************************************************
          *                       setProxy
          * ************************************************************************************************/
@@ -770,6 +780,7 @@
                 }
             }
             xmlHttp.open("POST", "/auth");
+            if(csrfToken) xmlHttp.setRequestHeader("X-CSRF-Token", csrfToken);
             var oldAdmin = EbyId("oldAdminPwd");
             authReq.oldadmin = oldAdmin.value;
             xmlHttp.send(btoa(JSON.stringify(authReq)));
@@ -820,6 +831,7 @@
                 }
             }
             xmlHttp.open("POST", "/auth");
+            if(csrfToken) xmlHttp.setRequestHeader("X-CSRF-Token", csrfToken);
             authReq.newadmin = EbyId("newAdminPwd").value;
             authReq.newuser = EbyId("newUserPwd").value;
             authReq.localAccess = EbyId("localAccess").checked;
@@ -846,6 +858,7 @@
                 }
             }
             xmlHttp.open("GET", "/command?restart=yes", true);
+            if(csrfToken) xmlHttp.setRequestHeader("X-CSRF-Token", csrfToken);
             xmlHttp.send(null);
         }
 
@@ -866,6 +879,7 @@
                 }
             }
             xmlHttp.open("GET", "/command?disconnect=yes", true);
+            if(csrfToken) xmlHttp.setRequestHeader("X-CSRF-Token", csrfToken);
             xmlHttp.send(null);
         }
 
@@ -923,6 +937,7 @@
             }
             var uri = "/command?deletelog=" + log;
             xmlHttp.open("GET", uri, true);
+            if(csrfToken) xmlHttp.setRequestHeader("X-CSRF-Token", csrfToken);
             xmlHttp.send(null);
         }
 
@@ -1408,6 +1423,7 @@
                 }
             }
             xmlHttp.open("GET", "/vcal?channel=" + inputEditChannel + "&cal=" + Number(EbyId("inputCalCal").value), true);
+            if(csrfToken) xmlHttp.setRequestHeader("X-CSRF-Token", csrfToken);
             xmlHttp.send(null);
         }
 
@@ -3264,11 +3280,13 @@
             if (url == configNewURL) {
                 xmlHttp.setRequestHeader("X-configSHA256", configSHA256);
             }
+            if(csrfToken) xmlHttp.setRequestHeader("X-CSRF-Token", csrfToken);
             xmlHttp.send(formData);
         }
 
 
         function setup() {
+            getCsrfToken();
             getTables();
             getConfig();
             resetDisplay();

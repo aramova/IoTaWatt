@@ -1,5 +1,15 @@
 var savedgraphs = [];
 var feeds = [];
+
+$.ajax({
+    url: "/auth/token",
+    async: false,
+    success: function(token) {
+        $.ajaxSetup({
+            headers: { 'X-CSRF-Token': token }
+        });
+    }
+});
 var feedlist = [];
 var plotdata = [];
 

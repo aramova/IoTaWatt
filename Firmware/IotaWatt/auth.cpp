@@ -11,8 +11,11 @@ static const char qop_authquote[] PROGMEM = "qop=\"auth\"";
 // #endif
 static bool       authDebug = false;
 
+authSession* currentAuthSession = nullptr;
+
 bool auth(authLevel level){
 
+  currentAuthSession = nullptr;
   if(authDebug) Serial.printf_P(PSTR("\nAuth: authenticate %s, authcount %d\n"), level==authAdmin ? "admin" : "user", authCount());
 
         // If no passwords or authorization not required, return true
@@ -132,10 +135,18 @@ bool auth(authLevel level){
 
   if(_response == _responsecheck){
     session->lastUsed = UTCtime();  
+    currentAuthSession = session;
     return true;
   } else {
     return false;
   }
+}
+
+bool validateCsrfToken(){
+    if(!currentAuthSession) return false;
+    if(!server.hasHeader(F("X-CSRF-Token"))) return false;
+    if(String(currentAuthSession->csrfToken) == server.header(F("X-CSRF-Token"))) return true;
+    return false;
 }
 
         // Setup session and send 401 Request Authorization.
@@ -191,7 +202,13 @@ authSession* newAuthSession(){
   session->IP = server.client().remoteIP();
   session->lastUsed = UTCtime();
   getNonce(session->nonce);
-    return session;
+
+  alignas(uint32_t) uint8_t csrfBuf[16];
+  getNonce(csrfBuf);
+  String token = bin2hex(csrfBuf, 8);
+  strcpy(session->csrfToken, token.c_str());
+
+  return session;
 }
 
         // Get existing authorization session if it exists.
