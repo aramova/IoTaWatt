@@ -276,6 +276,7 @@ uint32_t updater(struct serviceBlock* _serviceBlock) {
         }
       }
       state = checkAutoUpdate;
+      return 1;
     }
 
     case getTable: {
