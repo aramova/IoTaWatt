@@ -1,4 +1,5 @@
 #include "IotaWatt.h"
+#include "HashName.h"
 
 /**************************************************************************************************
  * Case insensitive string compare.  Works just like strcmp() just case insensitive 
@@ -61,13 +62,9 @@ char* charstar(const char str){
  * ************************************************************************************************/
 String hashName(const char* name){
   trace(T_utility,10);  
-  SHA256 sha256;
-  uint8_t hash[6];
-  sha256.reset();
-  sha256.update(name, strlen(name));
-  sha256.finalize(hash, 6);
+  std::string result = hashName_std(name);
   trace (T_utility,11);
-  return base64encode(hash, 6);
+  return String(result.c_str());
 }
 
 /**************************************************************************************************
