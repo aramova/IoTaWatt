@@ -223,12 +223,11 @@ uint32_t updater(struct serviceBlock* _serviceBlock) {
       trace(T_UPDATE,6);   
       request->setTimeout(5);
       request->onData([](void* arg, asyncHTTPrequest* request, size_t available){
-        uint8_t *buf = new uint8_t[500];
+        static uint8_t buf[500];
         while(request->available()){
           size_t read = request->responseRead(buf, 500);
           releaseFile.write(buf, read);
         }
-        delete[] buf;
         });
       request->send();
 
