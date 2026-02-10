@@ -68,6 +68,7 @@ bool authenticate(authLevel level){
 
 void handleRequest(){
   String uri = server.uri();
+  if(serverOn(authUser,  F("/auth/token"), HTTP_GET, handleCsrfToken)) return;
   if(serverOn(authUser,  F("/status"),HTTP_GET, handleStatus)) return;
   if(serverOn(authAdmin, F("/vcal"),HTTP_GET, handleVcal)) return;
   if(serverOn(authAdmin, F("/command"), HTTP_GET, handleCommand)) return;
@@ -103,6 +104,23 @@ void handleRequest(){
 bool serverOn(authLevel level, const __FlashStringHelper *uri, HTTPMethod method, genericHandler fn){
   if(strcmp_P(server.uri().c_str(),(PGM_P)uri) == 0 && server.method() == method){
     if( ! authenticate(level)) return true;
+
+    bool unsafe = (method == HTTP_POST || method == HTTP_PUT || method == HTTP_DELETE);
+    if (!unsafe && method == HTTP_GET) {
+        if (server.uri().equals(F("/command")) ||
+            server.uri().equals(F("/vcal")) ||
+            server.uri().equals(F("/update"))) {
+            unsafe = true;
+        }
+    }
+
+    if (unsafe && level != authNone) {
+        if (!validateCsrfToken()) {
+             server.send(403, txtPlain_P, F("CSRF Token Invalid"));
+             return true;
+        }
+    }
+
     fn();
     return true;
   }
@@ -230,6 +248,10 @@ void handleFileUpload(){
       return;
     }
     if( ! authenticate(authAdmin)) return;
+    if (!validateCsrfToken()) {
+        server.send(403, txtPlain_P, F("CSRF Token Invalid"));
+        return;
+    }
     if(upload.filename.equals(F(IOTA_CONFIG_NEW_PATH))){
       if(server.hasHeader(F("X-configSHA256"))){
         if(server.header(F("X-configSHA256")) != base64encode(configSHA256, 32)){
@@ -273,6 +295,10 @@ void handleSpiffsUpload(){
   HTTPUpload& upload = server.upload();
   if(upload.status == UPLOAD_FILE_START){
     if( ! authenticate(authAdmin)) return;
+    if (!validateCsrfToken()) {
+        server.send(403, txtPlain_P, F("CSRF Token Invalid"));
+        return;
+    }
     upload.filename.toLowerCase();
     //DBG_OUTPUT_PORT.printf_P(PSTR("Upload: START, filename: %s\r\n"), upload.filename.c_str());
     spiffsWrite(upload.filename.substring(11).c_str(), "", 0);        // Create a null file
@@ -977,4 +1003,13 @@ size_t sendChunk(char* buf, size_t bufPos){
   *(buf+5) = '\n';
   memcpy(buf+bufPos,"\r\n",2);
   return server.client().write(buf,bufPos+2);
+}
+
+void handleCsrfToken(){
+  trace(T_WEB,100);
+  if(currentAuthSession){
+    server.send(200, txtPlain_P, currentAuthSession->csrfToken);
+  } else {
+    returnFail("Not Authenticated", 401);
+  }
 }

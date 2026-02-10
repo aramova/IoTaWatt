@@ -4,6 +4,16 @@
 
 var savedgraphs = []; // JWYT - graph definitions saved on IoTaWatt for selection
 var series = []; // All of the series available, loaded from initial query
+
+$.ajax({
+    url: "/auth/token",
+    async: false,
+    success: function(token) {
+        $.ajaxSetup({
+            headers: { 'X-CSRF-Token': token }
+        });
+    }
+});
 var feedlist = []; // Currently selected series+units
 var yaxes = []; // array of descriptors for currently active yaxes
 var response = {}; // raw response from last data query

@@ -6,16 +6,20 @@ struct authSession {
     uint32_t        lastUsed;
     uint32_t        nc[4];
     uint8_t         nonce[16];
+    char            csrfToken[17];
     authSession()
         :next(nullptr)
         ,nc{0,0,0,0}
         ,lastUsed(0)
-        {}
+        { csrfToken[0] = 0; }
     ~authSession(){}
 };
 
+extern authSession* currentAuthSession;
+
 enum authLevel {authAdmin, authUser, authNone};
 
+bool validateCsrfToken();
 bool auth(authLevel);
 void requestAuth();
 String extractParam(String& authReq,const String& param,const char delimit = '"');
