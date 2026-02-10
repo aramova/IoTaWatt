@@ -370,43 +370,52 @@ void handleCreate(){
 void printDirectory() {
   trace(T_WEB,7); 
   if(!server.hasArg("dir")) return returnFail("BAD ARGS");
-  String response;
   String path = server.arg("dir");
   if(path.startsWith("/esp_spiffs")){
-    response = spiffsDirectory(path.substring(11));
+    server.send(200, appJson_P, spiffsDirectory(path.substring(11)));
+    return;
   }
-  else {
-    if(path != "/" && !SD.exists((char *)path.c_str())) return returnFail("BAD PATH");
-    Dir dir = SDFS.openDir(path);
-    DynamicJsonBuffer jsonBuffer;
-    JsonArray& array = jsonBuffer.createArray();
-    if(path == "/"){
-      JsonObject& object = jsonBuffer.createObject();
-      object["type"] = "dir";
-      object["name"] = "esp_spiffs";
-      array.add(object);
+
+  if(path != "/" && !SD.exists((char *)path.c_str())) return returnFail("BAD PATH");
+
+  Dir dir = SDFS.openDir(path);
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(200, appJson_P, "");
+  server.sendContent("[");
+
+  bool first = true;
+  if(path == "/"){
+    server.sendContent(F("{\"type\":\"dir\",\"name\":\"esp_spiffs\"}"));
+    first = false;
+  }
+
+  dir.rewind();
+  while(dir.next()){
+    if(dir.isDirectory() && !dir.fileName().equalsIgnoreCase(F("system volume information"))){
+      String json = "";
+      if(!first) json += ",";
+      json += F("{\"type\":\"dir\",\"name\":\"");
+      json += String(dir.fileName());
+      json += F("\"}");
+      server.sendContent(json);
+      first = false;
     }
-    dir.rewind();
-    while(dir.next()){
-      if(dir.isDirectory() && !dir.fileName().equalsIgnoreCase(F("system volume information"))){
-        JsonObject& object = jsonBuffer.createObject();
-        object["type"] = "dir";
-        object["name"] = String(dir.fileName());
-        array.add(object);
-      }
+  }
+
+  dir.rewind();
+  while(dir.next()){
+    if(dir.isFile()){
+      String json = "";
+      if(!first) json += ",";
+      json += F("{\"type\":\"file\",\"name\":\"");
+      json += String(dir.fileName());
+      json += F("\"}");
+      server.sendContent(json);
+      first = false;
     }
-    dir.rewind();
-    while(dir.next()){
-      if(dir.isFile()){
-        JsonObject& object = jsonBuffer.createObject();
-        object["type"] = "file";
-        object["name"] = String(dir.fileName());
-        array.add(object);
-      }
-    }
-    array.printTo(response);
-  }  
-  server.send(200, appJson_P, response);
+  }
+  server.sendContent("]");
+  server.sendContent("");
 }
 
 void printSpiffsDirectory(String path) {
